@@ -63,6 +63,15 @@ contract AdContract is Ownable {
 }
 
 contract AdMain is Ownable {
+  
+    event Click(address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
+
+    event Transfer(address indexed from, address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
+
+    event Withdraw(address indexed beneficiary, uint256 value);
+
+    event Deposit(address indexed beneficiary, uint256 value);
+
     using SafeMath for uint256;
 
     mapping (address => bool) public users;
@@ -85,7 +94,6 @@ contract AdMain is Ownable {
 
     function transfer(address from, address media, address user, uint256 mediaValue, uint256 userValue) internal returns (uint8){
         bool success = token.transfer(user, userValue);
-
         if (!success) {
             return 4;
         }
@@ -94,6 +102,7 @@ contract AdMain is Ownable {
         balances[from] = balances[from].sub(mediaValue);
         balances[media] = balances[media].add(mediaValue);
 
+        Transfer(from, media, user, mediaValue, userValue);
         return 0;
     }
 
@@ -121,7 +130,7 @@ contract AdMain is Ownable {
         if (!users[user]) {
             return 3;
         }
-
+        Click(media, user, mediaValue, userValue);
         return transfer(fromContract, media, user, mediaValue, userValue);
     }
 
@@ -135,6 +144,7 @@ contract AdMain is Ownable {
         require(success);
 
         balances[beneficiary] = balances[beneficiary].add(value);
+        Deposit(beneficiary, value);
     }
 
     function withdraw(address beneficiary, uint256 value) external {
@@ -142,6 +152,7 @@ contract AdMain is Ownable {
         balances[msg.sender] = balances[msg.sender].sub(value);
         bool success = token.transfer(beneficiary, value);
         require(success);
+        Withdraw(beneficiary, value);
     }
 
 }
