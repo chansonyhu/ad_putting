@@ -13,7 +13,8 @@ contract ERC20Basic {
 
 contract AdMainBasic {
     function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) external returns (uint8);
-    function withdraw(address beneficiary, uint256 value) external;
+    function withdraw(address beneficiary) external;
+    function newContract(address owner) external;
 }
 
 contract AdContract is Ownable {
@@ -26,31 +27,29 @@ contract AdContract is Ownable {
 
     string public imageURL;
     string public linkURL;
-    bool public initialized;
 
     AdMainBasic public admain;
 
-    function initialize(address addr, string image, string link) external onlyOwner {
-        require(!initialized);
+    function AdContract(address addr, string image, string link) public {
         admain = AdMainBasic(addr);
         imageURL = image;
         linkURL = link;
-        initialized = true;
+        admain.newContract(msg.sender);
     }
 
-    function getURL() view returns (string, string){
-        return imageURL, linkURL;
+    function getURL() view public returns (string, string) {
+        return (imageURL, linkURL);
     }
 
-    function adClick(address media) external returns (bool success) {
+    function adClick(address media) external returns (bool success){
         address user = msg.sender;
         if (users[user] == false) {
             //new user
-            users[user] = true;
             uint256 media_price = mediaBenefit[media].media_price;
             uint256 user_price = mediaBenefit[media].user_price;
             uint256 state = admain.clickAd(media, user, media_price, user_price);
-            if (state == 1) {
+            if (state == 0) {
+                users[user] = true;
                 return true;
             } else {
                 return false;
@@ -60,22 +59,23 @@ contract AdContract is Ownable {
             return false;
         }
     }
-    function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner {
+    function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner public {
         mediaBenefit[media].media_price = media_price;
         mediaBenefit[media].user_price = user_price;
     }
-    function withDraw(uint256 value) onlyOwner {
-        admain.withdraw(msg.sender, value);
+
+    function withdrawAd() onlyOwner public {
+        withdrawAd(msg.sender);
     }
 
-    function withDraw(address addr, uint256 value) onlyOwner {
-        admain.withdraw(addr, value);
+    function withdrawAd(address addr) onlyOwner public {
+        admain.withdraw(addr);
     }
 
 }
 
 contract AdMain is Ownable {
-  
+
     event Click(address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
 
     event Transfer(address indexed from, address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
@@ -83,6 +83,8 @@ contract AdMain is Ownable {
     event Withdraw(address indexed beneficiary, uint256 value);
 
     event Deposit(address indexed beneficiary, uint256 value);
+
+    event NewContract(address indexed, address indexed);
 
     using SafeMath for uint256;
 
@@ -146,14 +148,10 @@ contract AdMain is Ownable {
         return transfer(fromContract, media, user, mediaValue, userValue);
     }
 
-    function newContract(string imageURL, string linkURL) external returns (address) {
-        address adContract = new AdContract();
-        AdContract(adContract).initialize(address(this), imageURL, linkURL);
-        AdContract(adContract).transferOwnership(msg.sender);
-        adContracts[adContract] = msg.sender;
-        NewContract(msg.sender, adContract);
+    function newContract(address owner) external {
+        adContracts[msg.sender] = owner;
 
-        return adContract;
+        NewContract(msg.sender, owner);
     }
 
     function deposit(address beneficiary, uint256 value) external {
@@ -164,12 +162,16 @@ contract AdMain is Ownable {
         Deposit(beneficiary, value);
     }
 
-    function withdraw(address beneficiary, uint256 value) external {
-        require(balances[msg.sender] >= value);
-        balances[msg.sender] = balances[msg.sender].sub(value);
+    function withdraw() public {
+        withdraw(msg.sender);
+    }
+
+    function withdraw(address beneficiary) public {
+        uint256 value = balances[msg.sender];
         bool success = token.transfer(beneficiary, value);
+        balances[msg.sender] = 0;
+
         require(success);
         Withdraw(beneficiary, value);
     }
-
 }
