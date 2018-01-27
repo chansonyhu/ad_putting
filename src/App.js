@@ -1,16 +1,22 @@
 import React, { Component } from 'react'
 import AdMainContract from '../build/contracts/AdMain.json'
+import AdContractContract from '../build/contracts/AdContract.json'
+
 import getWeb3 from './utils/getWeb3'
 
 import { Layout, Menu, Spin, Alert} from 'antd';
 
 import AdBoard from './components/AdBoard';
-import Advertiser from './components/Advertiser';
+// import Advertiser from './components/Advertiser';
 
 import 'antd/dist/antd.css';
 import './App.css';
 
+const contract = require('truffle-contract');
 const { Header, Content, Footer } = Layout;
+const mediaAddr = "0xf17f52151ebef6c7334fad080c5704d77216b732";
+const adContractAddrs = ["0x8c7ef141e529c5263e2a45581d1c8a39f64dc5df"];
+
 
 class App extends Component {
   constructor(props) {
@@ -41,16 +47,14 @@ class App extends Component {
   }
 
   instantiateContract() {
-    /*
-     * SMART CONTRACT EXAMPLE
-     *
-     * Normally these functions would be called in the context of a
-     * state management library, but for convenience I've placed them here.
-     */
 
-    const contract = require('truffle-contract');
     const AdMain = contract(AdMainContract);
+    const AdContract = contract(AdContractContract);
     AdMain.setProvider(this.state.web3.currentProvider);
+    AdContract.setProvider(this.state.web3.currentProvider);
+    this.setState({
+      adContracts: adContractAddrs.map(addr => AdContract.at(addr))
+    });
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
@@ -61,7 +65,7 @@ class App extends Component {
         this.setState({
           adMain: instance
         });
-      })
+      });
     })
     
   }
@@ -73,17 +77,15 @@ class App extends Component {
   }
 
   renderContent = () => {
-    const { account, adMain, web3, mode } = this.state;
-
+    const { account, adMain, web3, mode, adContracts} = this.state;
     if (!adMain) {
       return <Spin tip="Loading..." />;
     }
-
     switch(mode) {
       case 'adBoard':
-        return <AdBoard account={account} adMain={adMain} web3={web3} />
-      case 'advertiser':
-        return <Advertiser account={account} adMain={adMain} web3={web3} />
+        return <AdBoard account={account} adMain={adMain} adContracts={adContracts} mediaAddr={mediaAddr} web3={web3} />
+      // case 'advertiser':
+      //   return <Advertiser account={account} adMain={adMain} adContract={adContract} web3={web3} />
       default:
         return <Alert message="请选一个模式" type="info" showIcon />
     }
@@ -102,7 +104,7 @@ class App extends Component {
             onSelect={this.onSelectTab}
           >
             <Menu.Item key="adBoard">广告板</Menu.Item>
-            <Menu.Item key="advertiser">广告主</Menu.Item>
+            {/* <Menu.Item key="advertiser">广告主</Menu.Item> */}
           </Menu>
         </Header>
         <Content style={{ padding: '0 50px' }}>
