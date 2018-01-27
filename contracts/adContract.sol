@@ -1,5 +1,5 @@
 pragma solidity ^0.4.8;
-import './Owner.sol'
+import './Owner.sol';
 contract AdMain{
     function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) external returns (uint8);
     function withdraw(address beneficiary, uint256 value) external;
@@ -16,7 +16,7 @@ contract AdContract is Ownable{
     AdMain public admain;
     
     function AdContract(address addr){
-        admain = AdContract(addr);
+        admain = AdMain(addr);
     }
     
     function AdClick(address media) external returns (bool success) {
