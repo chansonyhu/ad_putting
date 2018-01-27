@@ -26,13 +26,16 @@ contract AdContract is Ownable {
 
     string public imageURL;
     string public linkURL;
+    bool public initialized;
 
     AdMainBasic public admain;
 
-    function AdContract (address addr, string image, string link) public {
+    function initialize(address addr, string image, string link) external onlyOwner {
+        require(!initialized);
         admain = AdMainBasic(addr);
         imageURL = image;
         linkURL = link;
+        initialized = true;
     }
 
     function getURL() view public returns (string, string) {
@@ -92,7 +95,7 @@ contract AdMain is Ownable {
     ERC20Basic public token;
 
     function AdMain() public {
-        token = ERC20Basic(address(0x27992a037756b7f1b5d024527b37df5fcd1258ef));
+        token = ERC20Basic(address(0xf23805cace264d244d61d034c474b2c456be8c65));
     }
 
     function setUser(address who) onlyOwner external {
@@ -145,12 +148,15 @@ contract AdMain is Ownable {
         return transfer(fromContract, media, user, mediaValue, userValue);
     }
 
-    function newContract(string imageURL, string linkURL) external {
-        address adContract = new AdContract(address(this), imageURL, linkURL);
+    function newContract(string imageURL, string linkURL) external returns (address) {
+        address adContract = new AdContract();
+        AdContract(adContract).initialize(address(this), imageURL, linkURL);
         AdContract(adContract).transferOwnership(msg.sender);
         adContracts[adContract] = msg.sender;
 
         NewContract(msg.sender, adContract);
+
+        return adContract;
     }
 
     function deposit(address beneficiary, uint256 value) external {
@@ -170,4 +176,3 @@ contract AdMain is Ownable {
     }
 
 }
-
