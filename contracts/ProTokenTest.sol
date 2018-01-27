@@ -101,7 +101,7 @@ contract StandardToken is Token {
     mapping (address => mapping (address => uint256)) allowed;
 }
 
-contract ProToken is StandardToken {
+contract ProTokenTest is StandardToken {
 
     function () {
         //if ether is sent to this address, send it back.
