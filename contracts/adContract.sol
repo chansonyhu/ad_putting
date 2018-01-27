@@ -1,4 +1,4 @@
-pragma solidity ^0.4.8;
+pragma solidity ^0.4.18;
 import './Owner.sol';
 contract AdMain{
     function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) external returns (uint8);
@@ -12,13 +12,13 @@ contract AdContract is Ownable{
     }
     mapping (address => bool) public users;
     mapping (address => priceObject) public mediaBenefit;
-    
+
     AdMain public admain;
-    
+
     function AdContract(address addr){
         admain = AdMain(addr);
     }
-    
+
     function AdClick(address media) external returns (bool success) {
         address user = msg.sender;
         if(users[user] == false){
@@ -44,9 +44,9 @@ contract AdContract is Ownable{
     function withDraw(uint256 value)onlyOwner{
         admain.withdraw(msg.sender, value);
     }
-    
+
     function withDraw(address addr, uint256 value)onlyOwner{
         admain.withdraw(addr, value);
     }
-    
+
 }
