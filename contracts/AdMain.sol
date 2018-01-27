@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "./Owner.sol";
+import "./AdContract.sol";
 
 contract ERC20Basic {
   uint256 public totalSupply;
