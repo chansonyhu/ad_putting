@@ -29,14 +29,14 @@ contract AdContract is Ownable {
 
     AdMainBasic public admain;
 
-    function AdContract (address addr, string image, string link) {
+    function AdContract (address addr, string image, string link) public {
         admain = AdMainBasic(addr);
         imageURL = image;
         linkURL = link;
     }
 
-    function getURL() view returns (string, string){
-        return imageURL, linkURL;
+    function getURL() view public returns (string, string) {
+        return (imageURL, linkURL);
     }
 
     function adClick(address media) external returns (bool success) {
@@ -57,15 +57,15 @@ contract AdContract is Ownable {
             return false;
         }
     }
-    function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner {
+    function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner public{
         mediaBenefit[media].media_price = media_price;
         mediaBenefit[media].user_price = user_price;
     }
-    function withDraw(uint256 value) onlyOwner {
+    function withDraw(uint256 value) onlyOwner public{
         admain.withdraw(msg.sender, value);
     }
 
-    function withDraw(address addr, uint256 value) onlyOwner {
+    function withDraw(address addr, uint256 value) onlyOwner public{
         admain.withdraw(addr, value);
     }
 
@@ -170,3 +170,4 @@ contract AdMain is Ownable {
     }
 
 }
+
