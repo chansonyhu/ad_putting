@@ -130,22 +130,31 @@ contract AdMain is Ownable {
      * 3, invalid user
      * 4, fail to send tokens to user (critical problem!!!)
      * */
+
+    event Status(address indexed, uint8);
     function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) external returns (uint8) {
         address fromContract = msg.sender;
 
-        if (adContracts[msg.sender] == address(0x0)) {
+        if (adContracts[fromContract] == address(0x0)) {
+            Status(fromContract, 1);
             return 1;
         }
 
         if (mediaValue.add(userValue) >= balances[fromContract]) {
+            Status(fromContract, 2);
             return 2;
         }
 
         if (!users[user]) {
+            Status(fromContract, 3);
             return 3;
         }
-        Click(media, user, mediaValue, userValue);
-        return transfer(fromContract, media, user, mediaValue, userValue);
+        //Click(media, user, mediaValue, userValue);
+
+        uint8 result = transfer(fromContract, media, user, mediaValue, userValue);
+        Status(fromContract, result);
+
+        return result;
     }
 
     function newContract(address owner) external {
