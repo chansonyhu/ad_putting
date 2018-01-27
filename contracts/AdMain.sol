@@ -30,7 +30,7 @@ contract AdContract is Ownable {
         admain = AdMainBasic(addr);
     }
 
-    function AdClick(address media) external returns (bool success) {
+    function adClick(address media) external returns (bool success) {
         address user = msg.sender;
         if (users[user] == false) {
             //new user
@@ -127,6 +127,7 @@ contract AdMain is Ownable {
 
     function newContract() external {
         address adContract = new AdContract(address(this));
+        AdContract(adContract).transferOwnership(msg.sender); 
         adContracts[adContract] = msg.sender;
     }
 
