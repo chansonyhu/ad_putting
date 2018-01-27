@@ -126,7 +126,7 @@ contract AdMain is Ownable {
     }
 
     function newContract() external {
-        address adContract = new AdContract();
+        address adContract = new AdContract(address(this));
         adContracts[adContract] = msg.sender;
     }
 
