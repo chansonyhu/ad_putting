@@ -1,5 +1,6 @@
-var ProToken = artifacts.require("./ProToken.sol");
+var AdMain = artifacts.require("./AdMain.sol");
+var AdMain = artifacts.require("./AdMain.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(ProToken);
+  deployer.deploy(AdMain);
 };

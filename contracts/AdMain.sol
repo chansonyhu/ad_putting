@@ -38,8 +38,8 @@ contract AdContract is Ownable {
         initialized = true;
     }
 
-    function getURL() view public returns (string, string) {
-        return (imageURL, linkURL);
+    function getURL() view returns (string, string){
+        return imageURL, linkURL;
     }
 
     function adClick(address media) external returns (bool success) {
@@ -60,22 +60,22 @@ contract AdContract is Ownable {
             return false;
         }
     }
-    function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner public{
+    function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner {
         mediaBenefit[media].media_price = media_price;
         mediaBenefit[media].user_price = user_price;
     }
-    function withDraw(uint256 value) onlyOwner public{
+    function withDraw(uint256 value) onlyOwner {
         admain.withdraw(msg.sender, value);
     }
 
-    function withDraw(address addr, uint256 value) onlyOwner public{
+    function withDraw(address addr, uint256 value) onlyOwner {
         admain.withdraw(addr, value);
     }
 
 }
 
 contract AdMain is Ownable {
-
+  
     event Click(address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
 
     event Transfer(address indexed from, address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
@@ -83,8 +83,6 @@ contract AdMain is Ownable {
     event Withdraw(address indexed beneficiary, uint256 value);
 
     event Deposit(address indexed beneficiary, uint256 value);
-
-    event NewContract(address indexed owner, address indexed);
 
     using SafeMath for uint256;
 
@@ -144,7 +142,7 @@ contract AdMain is Ownable {
         if (!users[user]) {
             return 3;
         }
-        //Click(media, user, mediaValue, userValue);
+        Click(media, user, mediaValue, userValue);
         return transfer(fromContract, media, user, mediaValue, userValue);
     }
 
@@ -153,7 +151,6 @@ contract AdMain is Ownable {
         AdContract(adContract).initialize(address(this), imageURL, linkURL);
         AdContract(adContract).transferOwnership(msg.sender);
         adContracts[adContract] = msg.sender;
-
         NewContract(msg.sender, adContract);
 
         return adContract;
