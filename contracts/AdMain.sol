@@ -11,36 +11,36 @@ contract ERC20Basic {
   event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
-contract AdMainBasic{
+contract AdMainBasic {
     function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) external returns (uint8);
     function withdraw(address beneficiary, uint256 value) external;
 }
 
-contract AdContract is Ownable{
-    struct priceObject{
+contract AdContract is Ownable {
+    struct PriceObject {
         uint256 media_price;
         uint256 user_price;
     }
     mapping (address => bool) public users;
-    mapping (address => priceObject) public mediaBenefit;
+    mapping (address => PriceObject) public mediaBenefit;
 
     AdMainBasic public admain;
 
-    function AdContract(address addr){
+    function AdContract (address addr) {
         admain = AdMainBasic(addr);
     }
 
     function AdClick(address media) external returns (bool success) {
         address user = msg.sender;
-        if(users[user] == false){
+        if (users[user] == false) {
             //new user
             users[user] = true;
             uint256 media_price = mediaBenefit[media].media_price;
             uint256 user_price = mediaBenefit[media].user_price;
             uint256 state = admain.clickAd(media, user, media_price, user_price);
-            if(state == 1){
+            if (state == 1) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
         }else{
@@ -48,15 +48,15 @@ contract AdContract is Ownable{
             return false;
         }
     }
-    function setPrice(address media, uint256 media_price, uint256 user_price)onlyOwner{
+    function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner {
         mediaBenefit[media].media_price = media_price;
         mediaBenefit[media].user_price = user_price;
     }
-    function withDraw(uint256 value)onlyOwner{
+    function withDraw(uint256 value) onlyOwner {
         admain.withdraw(msg.sender, value);
     }
 
-    function withDraw(address addr, uint256 value)onlyOwner{
+    function withDraw(address addr, uint256 value) onlyOwner {
         admain.withdraw(addr, value);
     }
 
@@ -71,7 +71,7 @@ contract AdMain is Ownable {
 
     ERC20Basic public token;
 
-    function AdMain() public{
+    function AdMain() public {
         token = ERC20Basic(address(0x27992a037756b7f1b5d024527b37df5fcd1258ef));
     }
 
