@@ -24,10 +24,19 @@ contract AdContract is Ownable {
     mapping (address => bool) public users;
     mapping (address => PriceObject) public mediaBenefit;
 
+    string public imageURL;
+    string public linkURL;
+
     AdMainBasic public admain;
 
-    function AdContract (address addr) {
+    function AdContract (address addr, string image, string link) {
         admain = AdMainBasic(addr);
+        imageURL = image;
+        linkURL = link;
+    }
+
+    function getURL() view returns (string, string){
+        return imageURL, linkURL;
     }
 
     function adClick(address media) external returns (bool success) {
@@ -125,9 +134,9 @@ contract AdMain is Ownable {
         return transfer(fromContract, media, user, mediaValue, userValue);
     }
 
-    function newContract() external {
-        address adContract = new AdContract(address(this));
-        AdContract(adContract).transferOwnership(msg.sender); 
+    function newContract(string imageURL, string linkURL) external {
+        address adContract = new AdContract(address(this), imageURL, linkURL);
+        AdContract(adContract).transferOwnership(msg.sender);
         adContracts[adContract] = msg.sender;
     }
 
