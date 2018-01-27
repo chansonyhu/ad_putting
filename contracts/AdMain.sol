@@ -2,12 +2,40 @@ pragma solidity ^0.4.18;
 
 import "./Owner.sol";
 
+contract Pausable is Ownable {
+  event Pause();
+  event Unpause();
+
+  bool public paused = false;
+
+  modifier whenNotPaused() {
+    require(!paused);
+    _;
+  }
+
+  modifier whenPaused {
+    require(paused);
+    _;
+  }
+
+  function pause() onlyOwner whenNotPaused returns (bool) {
+    paused = true;
+    Pause();
+    return true;
+  }
+
+  function unpause() onlyOwner whenPaused returns (bool) {
+    paused = false;
+    Unpause();
+    return true;
+  }
+}
+
 contract ERC20Basic {
   uint256 public totalSupply;
   function balanceOf(address who) public view returns (uint256);
   function transfer(address to, uint256 value) public returns (bool);
   function transferFrom(address from, address to, uint256 value) public returns (bool);
-
   event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
@@ -15,6 +43,7 @@ contract AdMainBasic {
     function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) external returns (uint8);
     function withdraw(address beneficiary) external;
     function newContract(address owner) external;
+    function isPaused() public returns (bool);
 }
 
 contract AdContract is Ownable {
@@ -32,6 +61,7 @@ contract AdContract is Ownable {
 
     function AdContract(address addr, string image, string link) public {
         admain = AdMainBasic(addr);
+        require(!admain.isPaused());
         imageURL = image;
         linkURL = link;
         admain.newContract(msg.sender);
@@ -42,6 +72,7 @@ contract AdContract is Ownable {
     }
 
     function adClick(address media) external returns (bool success){
+        require(!admain.isPaused());
         address user = msg.sender;
         if (users[user] == false) {
             //new user
@@ -60,6 +91,7 @@ contract AdContract is Ownable {
         }
     }
     function setPrice(address media, uint256 media_price, uint256 user_price) onlyOwner public {
+        require(!admain.isPaused());
         mediaBenefit[media].media_price = media_price;
         mediaBenefit[media].user_price = user_price;
     }
@@ -74,7 +106,7 @@ contract AdContract is Ownable {
 
 }
 
-contract AdMain is Ownable {
+contract AdMain is Pausable {
 
     event Click(address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
 
@@ -86,16 +118,34 @@ contract AdMain is Ownable {
 
     event NewContract(address indexed, address indexed);
 
+    event ContractUpgrade(address newContract);
+
+    event TokenUpgrade(address newToken);
+
     using SafeMath for uint256;
 
     mapping (address => bool) public users;
     mapping (address => address) public adContracts;
     mapping (address => uint256) public balances;
+    address public newContractAddress;
+    address public newTokenAddress;
 
     ERC20Basic public token;
 
     function AdMain() public {
+        paused = true;
         token = ERC20Basic(address(0xf23805cace264d244d61d034c474b2c456be8c65));
+    }
+
+    function setNewERC20(address _erc20addr) external onlyOwner whenPaused {
+        newTokenAddress = _erc20addr;
+        token = ERC20Basic(newTokenAddress);
+        TokenUpgrade(newTokenAddress);
+    }
+
+    function setNewAddress(address _v2Address) external onlyOwner whenPaused {
+        newContractAddress = _v2Address;
+        ContractUpgrade(_v2Address);
     }
 
     function setUser(address who) onlyOwner external {
@@ -132,7 +182,7 @@ contract AdMain is Ownable {
      * */
 
     event Status(address indexed, uint8);
-    function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) external returns (uint8) {
+    function clickAd(address media, address user, uint256 mediaValue, uint256 userValue) whenNotPaused external returns (uint8) {
         address fromContract = msg.sender;
 
         if (adContracts[fromContract] == address(0x0)) {
@@ -157,13 +207,13 @@ contract AdMain is Ownable {
         return result;
     }
 
-    function newContract(address owner) external {
+    function newContract(address owner) whenNotPaused external {
         adContracts[msg.sender] = owner;
 
         NewContract(msg.sender, owner);
     }
 
-    function deposit(address beneficiary, uint256 value) external {
+    function deposit(address beneficiary, uint256 value) whenNotPaused external {
         bool success = token.transferFrom(msg.sender, address(this), value);
         require(success);
 
@@ -171,16 +221,26 @@ contract AdMain is Ownable {
         Deposit(beneficiary, value);
     }
 
-    function withdraw() public {
+    function withdraw() whenNotPaused public {
         withdraw(msg.sender);
     }
 
-    function withdraw(address beneficiary) public {
+    function withdraw(address beneficiary) whenNotPaused public {
         uint256 value = balances[msg.sender];
         bool success = token.transfer(beneficiary, value);
         balances[msg.sender] = 0;
 
         require(success);
         Withdraw(beneficiary, value);
+    }
+
+    function unpause() public onlyOwner whenPaused returns (bool) {
+      require(newContractAddress == address(0));
+      require(newTokenAddress == address(0));
+      super.unpause();
+    }
+
+    function isPaused() public returns (bool) {
+        return paused;
     }
 }
