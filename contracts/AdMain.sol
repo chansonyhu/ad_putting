@@ -72,7 +72,7 @@ contract AdContract is Ownable {
 }
 
 contract AdMain is Ownable {
-  
+
     event Click(address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
 
     event Transfer(address indexed from, address indexed media, address indexed user, uint256 mediaValue, uint256 userValue);
@@ -80,6 +80,8 @@ contract AdMain is Ownable {
     event Withdraw(address indexed beneficiary, uint256 value);
 
     event Deposit(address indexed beneficiary, uint256 value);
+
+    event NewContract(address indexed owner, address indexed);
 
     using SafeMath for uint256;
 
@@ -139,7 +141,7 @@ contract AdMain is Ownable {
         if (!users[user]) {
             return 3;
         }
-        Click(media, user, mediaValue, userValue);
+        //Click(media, user, mediaValue, userValue);
         return transfer(fromContract, media, user, mediaValue, userValue);
     }
 
@@ -147,6 +149,8 @@ contract AdMain is Ownable {
         address adContract = new AdContract(address(this), imageURL, linkURL);
         AdContract(adContract).transferOwnership(msg.sender);
         adContracts[adContract] = msg.sender;
+
+        NewContract(msg.sender, adContract);
     }
 
     function deposit(address beneficiary, uint256 value) external {
