@@ -59,7 +59,7 @@
 
 ### 七、Demo展示
 
-* 本地安装node.js，配置[truffle]环境(http://truffleframework.com/docs/getting_started/installation)
+* 本地安装node.js，配置[truffle](http://truffleframework.com/docs/getting_started/installation)环境
 
 * 拷贝本项目：git clone https://github.com/chansonyhu/ad_putting.git
 
@@ -67,7 +67,7 @@
 
 * 运行：npm start
 
-* 需要安装[MetaMask]以太坊轻钱包(https://metamask.io)
+* 需要安装[MetaMask](https://metamask.io)以太坊轻钱包
 
 
 ### 八、团队成员
