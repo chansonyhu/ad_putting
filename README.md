@@ -38,7 +38,7 @@
 
 ![flow1](flow1.jpeg)
 
-### 四、优化
+### 六、优化
 
 1.合约逻辑优化
   -链下结算节约交易成本
@@ -57,7 +57,7 @@
       - 用户重复点击同一广告不会被“双重支付”
       - ...
 
-### 五、Demo展示
+### 七、Demo展示
 
 * 本地安装node.js，配置[truffle]环境(http://truffleframework.com/docs/getting_started/installation)
 
@@ -70,7 +70,7 @@
 *需要安装[MetaMask]以太坊轻钱包(https://metamask.io)
 
 
-### 六、团队成员
+### 八、团队成员
 
 - 合约开发：李辰星、曾丽仪、于千山
 - 前端开发：谭旭、侯佳莹、夏提克
